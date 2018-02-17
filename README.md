@@ -45,48 +45,48 @@ It would be 2^n but you have to remember that LR and RL is the same pattern (wit
 There are many things you can try, such as counting and plotting the different colors of the patches, or count how many ticks it takes for the ant to reach the edge. Basic interaction would be to setup with a Rule and let it go to see what it does. Is it chaotic? Does the ant build a highway? Can you find some rules for its behavior given the rule string (try rules with some palindromy)? Here are some interesting ideas:
 
 HIGHWAY CONSTRUCTION
-********************
-RL                   Langton's RuLe
-RLL, RLLL, RLLLL...  Very fast
-RRLLRRRLRRR          Fast
-RLRLLRLRLR           Thick
-RRRLLLRRR            Unexpected
-RRLRLLRLRR           Large
-RRRLRRRLLLRR         Thick
-RRRLRRLLLLLL         Takes a while
-RLLRLRLRRRLL         Convoluted
+_____________________
+- RL                   Langton's RuLe
+- RLL, RLLL, RLLLL...  Very fast
+- RRLLRRRLRRR          Fast
+- RLRLLRLRLR           Thick
+- RRRLLLRRR            Unexpected
+- RRLRLLRLRR           Large
+- RRRLRRRLLLRR         Thick
+- RRRLRRLLLLLL         Takes a while
+- RLLRLRLRRRLL         Convoluted
 
 SPACE FILLING
-********************
-RRLRLRR              Triangle
-RLLLRLLLRR           Triangle
-RRRLLLRLLLRR         Triangle
-RLRRRRRLLLRR         Triangle
-RRRRRRLLRLRR         Aircraft
+_____________________
+- RRLRLRR              Triangle
+- RLLLRLLLRR           Triangle
+- RRRLLLRLLLRR         Triangle
+- RLRRRRRLLLRR         Triangle
+- RRRRRRLLRLRR         Aircraft
 
 WHOLE PLANE FILLING
-********************
-RRLRR                Square
-RLLRRRL              Square
-RLLRRRRRL     	     Square with knots
-RLLLRRRLLLLR         Spiral in a square
-RRRLLLRRRRL          Spiral in a square with knots
+_____________________
+- RRLRR                Square
+- RLLRRRL              Square
+- RLLRRRRRL     	     Square with knots
+- RLLLRRRLLLLR         Spiral in a square
+- RRRLLLRRRRL          Spiral in a square with knots
 
 ARTISTIC SHAPES
-********************
-RRLL                 Brain
-RLLR                 Complex symmetrical mandala
-RRLRRLLLLLLR         Chaos with highways in a square
-RRLLRRRLRRRR         Growing 3D-like solid
-RLLLLLRLLLLRLLLR     Chaos grows in a jagged square
-RRLLLLLLRRLR         Chaos grows in a jagged square
-RRRRRRRRLLRL         Chaos grows in a jagged square
-RRRRRLLRL            Chaos grows in a jagged square
-RRRRRLLLRLL          Chaos grows in a jagged square
-RRRRRLRRRLL          Chaos grows in a jagged square
-RLLLLLLLRLRL         Chaos grows in fractal-like filled background
-RRRRRRRLRRLL         Chaos grows in a rotated square
-RLLLLLLRRRRRRLLLRRRRR Fractal like sawtooth square
+_____________________
+- RRLL                 Brain
+- RLLR                 Complex symmetrical mandala
+- RRLRRLLLLLLR         Chaos with highways in a square
+- RRLLRRRLRRRR         Growing 3D-like solid
+- RLLLLLRLLLLRLLLR     Chaos grows in a jagged square
+- RRLLLLLLRRLR         Chaos grows in a jagged square
+- RRRRRRRRLLRL         Chaos grows in a jagged square
+- RRRRRLLRL            Chaos grows in a jagged square
+- RRRRRLLLRLL          Chaos grows in a jagged square
+- RRRRRLRRRLL          Chaos grows in a jagged square
+- RLLLLLLLRLRL         Chaos grows in fractal-like filled background
+- RRRRRRRLRRLL         Chaos grows in a rotated square
+- RLLLLLLRRRRRRLLLRRRRR Fractal like sawtooth square
 
 ## EXTENDING THE MODEL
 This model is a big playground, it can be extended in many ways. Here are some suggestions:
