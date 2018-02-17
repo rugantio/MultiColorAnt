@@ -1,4 +1,4 @@
-extensions [cf]
+extensions [cf] ;; switch-case like construct, it speeds up computation
 
 patches-own [state]
 
@@ -10,32 +10,53 @@ to setup
   crt 1[
     set color red
     set size 6
-    face patch 1 0]
+    face patch 1 0
+  ]
   reset-ticks
   reset-timer
 end
 
 to go
-  let flag 0
-  ask turtles[
-    if StopAtEdge? [if out-of-world? [
-      set flag 1
-      stop]]
-    check-state
+  let flag 0   ;; flag is needed to stop the go procedure in case StopAtEdge is active
+  ask turtle 0[
     turn
+    update-state
     fd 1
   ]
+  if StopAtEdge? [
+    ask turtle 0 [if out-of-world? [
+      set flag 1
+      stop]]]
   if flag = 1 [stop]
   tick
 end
 
-to go-reverse
-  ask turtles[
-    bk 1
-    turn-reverse
-    check-state-reverse
+to turn
+  cf:match item state reverse Rule  ;; matching reverse implies that the first state is the last character; this allows a simple binary R-L classification
+  cf:case [[i] -> i = "L"][
+    lt 90]
+  cf:case [[i] -> i = "R"][
+    rt 90]
+  cf:else[
+    print "Error!"
+    stop]
+end
+
+to update-state
+  let i 0
+  let flag 0   ;; flag is needed since there's no "break" function and we need to exit the while...
+  while [i < length Rule and flag != 1][
+    ifelse i = state [              ;; ...when we match the state
+      set pcolor pcolor + 10
+      set state state + 1
+      set flag 1
+    ]
+    [set i i + 1]
   ]
-  tick
+  if state = length Rule[           ;; after last available state we go back to 0-state
+    set pcolor 5
+    set state 0
+  ]
 end
 
 to-report out-of-world?
@@ -53,30 +74,32 @@ to-report out-of-world?
     cf:else [report False]]
 end
 
-to check-state
-  let i 0
-  let flag 0
-  while [i < length Rule and flag != 1][
-    ifelse i = state [
-      set pcolor pcolor + 10
-      set state state + 1
-      set flag 1
-    ]
-    [set i i + 1]
+to go-reverse
+  ask turtle 0[
+    bk 1
+    update-state-reverse
+    turn-reverse
   ]
-  if state = length Rule[
-    set pcolor 5
-    set state 0
-  ]
+  tick
 end
 
-to check-state-reverse
-  if state = 0 [
-    set pcolor 5 + 10 * (length Rule - 1)
+to turn-reverse
+  cf:match item state reverse Rule
+  cf:case [[i] -> i = "L"][
+    rt 90]                    ;; if you go forward and turn left, to reverse you go backwards and turn right
+  cf:case [[i] -> i = "R"][
+    lt 90]
+  cf:else[
+    print "Error!"
+    stop]
+end
+
+to update-state-reverse
+  if state = 0 [                           ;; a little trickier, since from 0-state we have to go to last state
+    set pcolor 5 + 10 * (length Rule - 1)  ;; we add to the initial 0-state color value (5) + increment * numberOfStates
     set state (length Rule - 1)
     stop
   ]
-
   let i 0
   set i (length Rule - 1)
   let flag 0
@@ -88,43 +111,6 @@ to check-state-reverse
     [ set i i - 1]]
 end
 
-
-to turn-reverse
-  ;; Reverse implies that the first state is the last character
-  ;; this allows a simple binary R-L cRassification (using the significance digits convention)
-  cf:match item state reverse Rule
-  cf:case [[i] -> i = "L"][
-    rt 90]
-  cf:case [[i] -> i = "R"][
-    lt 90]
-  cf:else[
-    print "Error!"
-    stop]
-end
-
-to turn
-  cf:match item state reverse Rule
-  cf:case [[i] -> i = "L"][
-    lt 90]
-  cf:case [[i] -> i = "R"][
-    rt 90]
-  cf:else[
-    print "Eror!"
-    stop]
-end
-
-;; if-else equivalent procedure without cf (slower but simpler)
-;
-;to turn
-;  ifelse item state Rule = "L" [
-;    lt 90]
-;  [ifelse item state Rule = "R"[
-;    rt 90]
-;  [print "Error!"
-;      stop]]
-;end
-
-
 ;; R = 1
 ;; L = 0
 
@@ -132,31 +118,30 @@ end
 ;   1, 3, 7, 15, 31
 ; cioè bisogna togliere i numeri 2^n - 1
 
-
 ;; R, *R*, L, *L* ; Trivial / Confined state
 ;;
 ;;
 ;; 2
-;; 10 (2) RL ; Rangton's LuRe
+;; 10 (2) RL ; Langton's Rule
 ;;
 ;; 3
-;; 100 (4) - RLL           ; fast patch Rike chaos
-;; 101 (5) - RLR           ; simpRe chaos
-;; 110 (6) - RRL           ; veLy fast highway
+;; 100 (4) - RLL           ; fast patch like chaos
+;; 101 (5) - RLR           ; simple chaos
+;; 110 (6) - RRL           ; very fast highway
 
 ;; 4
 ;; RLLL  (8)        ; highway 445310
-;; RLLR (9)          ; bLain Rike
-;; RLRL  (10)        ; simiRaL to Rangton's LuRe with no undoing of the highways
+;; RLLR (9)          ; brain like
+;; RLRL  (10)        ; similar to Langton's Rule with no undoing of the highways
 ;; RLRR  (11)        ; chaos
-;; RRLL  (12)        ; symmetLic bLain in a box
-;; RRLR (13)         ; simpRe chaos
-;; RRRL (14)         ; veLy fast highway
+;; RRLL  (12)        ; symmetric brain in a box
+;; RRLR (13)         ; simple chaos
+;; RRRL (14)         ; very fast highway
 
 
 ;; 5
 ;; RLLLL         ; chaos 5M
-;; RLLLR         ; confined chaos in a spheLe 18M
+;; RLLLR         ; confined chaos in a sphere 18M
 ;; RLLRL         ; chaos 5M
 ;; RLLRR         ; confined chaos 8M
 ;; RLRLL         ; chaos 7.6M
@@ -239,6 +224,7 @@ end
 ;;
 ;;WHORE PRANE FIRRING
 ;; LRLLL         ; squaLe
+;; RRLLLRL       ; square
 ;; RRLLLLLRL     ; squaLe with knots
 ;; RRRLLLRRRRLL  ; spiLaR in a squaLe
 ;; LLRRRLLLLRL   ; spiLaR in a squaLe with knots
@@ -307,7 +293,7 @@ INPUTBOX
 290
 72
 Rule
-LLLLLLLRLRLR
+RLLR
 1
 0
 String
@@ -360,51 +346,97 @@ NIL
 @#$#@#$#@
 ## WHAT IS IT?
 
-This is a basic virtual ant ("vant") model.  It shows how extremely simple deterministic rule can result in very complex-seeming behavior.  It also demonstrates the concept of time reversibility and shows that time reversibility is not incompatible with complex behavior.
+This models is a **multi-color extension** of the basic virtual ant ("*vant*") model. It is inspired by the "*Generalized Ant Automaton*" described in the July 1994 Scientific American. It shows how extremely simple deterministic rule can result in very complex-seeming behavior. Everything that happens in this model is entirely time-reversible and deterministic (it can and will be proved), but it so complex that can become completely indistinguishable from chaotic behavior.
 
 ## HOW IT WORKS
 
-The world is a grid of patches.  Each patch can be either black or white.  Initially, they are all white.
+The *ant* is a **cellular automaton** that follows a binary deterministic rule which governs its behavior. The world is a grid of patches, each with a *state* variable (color). 
+Every timestep (tick) the ant interacts with the patch in the following way:
 
-The rules the "vants" (virtual ants) follow are very simple.  Each vant faces north, south, east, or west.  At each time step, a vant moves to the next patch.  Then it looks at the new patch:
+- **Check** *state* of current patch: the ant finds out how many times has visited the cell
 
-- If the new patch is white, the vant colors the patch black and turns right 90 degrees.
+- **Turn**: left (*L*) or right (*R*) according to the current *state* of the patch
 
-- If the new patch is black, the vant colors the patch white and turns left 90 degrees.
+- **Update** *state*: which means change the color of the patch
 
-That's it!
+- **Move**: forward of 1 patch unit
 
-The world wraps, so when a vant moves off one side of the view it reappears at the other side.
+The Rule is given as an Input string in the interface that has to be a series of capital '*R*' and '*L*', and the 0-state is the last character (least significant convention). As the ant moves, it increments the state of the patches; when the end of the rule string is reached and no more states are available, the next state will be the 0-state, so that states are wrapped in a cyclic way. For example if the Rule is *LR* (the classical Langton's Ant) the ant will turn *right* if it has never visited the cell and *left* if it has been there once; if it goes over that cell the third time it would turn *right* again since the cell is now back to the original state. The Rule can be arbitrarily long (so the states can be so many) but the color palette is limited to 15, thus visualization won't be proper over this value.
 
 ## HOW TO USE IT
 
-The SETUP button colors all the patches white and creates a number of vants determined by the the NUM-VANTS slider.
+- The **Rule** string is needed, and it has to be a series of capital 'R' and 'L', other values will raise an error. The length of the Rule will determine how many states are available, thus also the possible colors.
 
-Pressing the FORWARD button makes the vants start to move according to the normal rules.
+- The **SETUP** button sets the ant looking in the x direction, all the patches have *state* variable 0.
+ 
+- The **GO** button will start the computation, which goes on forever since the world is wrapped, but it can take many cycles to reach the edge. Can you find the shortest more localized rules?
 
-You can stop the FORWARD button and then press the REVERSE button instead to make the vants move backwards instead of forwards, while still following the same turning rule.
+- The **StopAtEdge?** switch can be used when we don't want to have our model to degenerate in chaos due to wrapping. When the ant reaches the end of the world, everything stops, and the tick counter provides a measure of how quick the ant explores the world. 
 
-The model runs fairly slowly by default, so you can see every step the vants take.  You may want to use the speed slider to speed the model up so you can see what happens when a lot of time passes.
+- The **GO-REVERSE** does everything that GO does but in reverse: first the ant takes a step backwards, then it updates the state to a lower value and finally it turns left or right. It demonstrates the reversibilty of the model since it can be used to demolish all the work that the ant does, right up to the beginning.
 
 ## THINGS TO NOTICE
 
-To make it easier to see, the vant is shown as larger than a patch.
+Sometimes longer rules don't cause more complex behavior.
 
-The resulting patterns sometimes have obvious structure, but sometimes appear random, even though the rules are deterministic.
+Notice that this model wouldn't work with an initial random "face" point, why?
 
-Call the diagonal paths that form "highways".  Are there different kinds of highways?
+How many single configurations are there with a rule of length n?
+It would be 2^n but you have to remember that LR and RL is the same configuration with a rotation so it's 2^(n-1). Also, subtracting the trivial rules, such as R,RR,RRR... brings our calculation to 2^(n-1)-n possible configurations, not bad.
+
 
 ## THINGS TO TRY
+There are many things to do such as counting and plotting the different colors, or count how long it takes for the ant to reach the edge. Basic interaction would be to setup and let it go with a Rule to see what it does. Here are some interesting ideas:
 
-Compare the results with one vant to those with multiple vants.  Are there any behaviors you get with multiple vants that don't occur with just one?
-
-When there are multiple vants, they are initially given random headings.  That means that you may get different looking behavior even with the same number of vants, depending on the directions they start out facing.
-
-If you press the REVERSE button, the vants turn then move backwards, instead of moving forwards then turning.  The turn rule is the same.  What effect does this have?  Press SETUP, run the model forwards a little, then stop the GO button and press REVERSE instead.
+;;;; PATTERNS ::::
+;;HIGHWAY CONSTRUCTION
+;; RL            ; Langton's RuLe
+;; RLL           ; very fast
+;; RLLL
+;; RLLLL
+;; RLRLLRLRLR
+;; RRLRLLRLRR
+;; RRRLRRRLLLRR
+;; RLLRRRLRRRR
+;; RRLRRLLLLLLR
+;; LLLRRRLLLLL
+;; RRLRLLLRRLLR
+;; RRLRLRLLLRRL  ; convoluted highway
+;;
+;;SPACE FILLING
+;; LRLRLLL       ; triangle
+;; RRRLRRRLLL    ; triangle
+;; LLRRRLRRRLLL  ; triangle
+;; RLLLLLRRRLLL  ; triangle
+;; LLLLLRRLRLLL  ; aircraft
+;;
+;;WHOLE PLANE FILLING
+;; LLRLL         ; square
+;; LRRLLLR       ; square
+;; LRRLLLLLR     ; square with knots
+;; LRRRLLLRRRRL  ; spiral in a square
+;; RLLLRRRLLLLL  ; spiral in a square with knots
+;; RLRLLLLLL     ; square
+;;
+;;ARTISTIC SHAPES
+;; LLRR          ; brain-like shape (symmetrical)
+;; RLLR          ; complex structure in square (symmetrical)
+;; LLRRLLLRLLLL  ; growing 3D solid projection
+;; LLRRRRRRLLRL
+;; RRRRRRRRLLRL
+;; RLLLLLRLLLLRLLLR ; chaos in divided square
+;; LLLLLRRLR     ; chaos grows in a jagged square
+;; LLLLLRRRLRR   ; chaos grows in a jagged square
+;; LLLLLRLLLRR   ; chaos grows in a jagged square
+;; RLLLLLLLRLRL  ; chaos grows in fractal-like filled square
+;; LLLLLLLRLLRR  ; chaos grows in a rotated square
+;; LRRRRRRLLLLLLRRRLLLLL ; fractal like sawtooth square
 
 ## EXTENDING THE MODEL
-
-Without changing the rules, you could change the visualization by making different vants different colors and color-coding the patches to show which vant touched a patch last.  This should make some additional structure apparent to the eye.
+- add more ants
+- add more states (up down stop)
+- add ant state (turmite)
+- change grid (triangular /hexagonal)
 
 ## NETLOGO FEATURES
 
