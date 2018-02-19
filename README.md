@@ -45,7 +45,7 @@ It would be 2^n but you have to remember that LR and RL is the same pattern (wit
 There are many things you can try, such as counting and plotting the different colors of the patches, or count how many ticks it takes for the ant to reach the edge. Basic interaction would be to setup with a Rule and let it go to see what it does. Is it chaotic? Does the ant build a highway? Can you find some rules for its behavior given the rule string (try rules with some palindromy)? Here are some interesting ideas:
 
 ### HIGHWAY CONSTRUCTION
-- RL                   Langton's RuLe
+- RL                   Langton's ant
 - RLL, RLLL, RLLLL...  Very fast
 - RRLLRRRLRRR          Fast
 - RLRLLRLRLR           Thick
